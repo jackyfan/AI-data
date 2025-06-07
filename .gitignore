@@ -1,12 +1,5 @@
 ### Project-specific ###
-# Logs
-logs/
 
-# Data
-data/
-
-# Workspace
-workspace/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
