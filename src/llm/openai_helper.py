@@ -5,7 +5,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from utility.logger_helper import LoggerHelper
 
 api_key = os.getenv("OPENAI_API_KEY")
-log = LoggerHelper.get_logger(__name__)
+logger = LoggerHelper.get_logger(__name__)
 
 
 def create_llm(model_name="gpt-3.5-turbo"):
@@ -37,7 +37,7 @@ def json_chain(model_name, prompt, cls):
     """
     json_llm = create_json_llm(model_name)
     chain = json_llm | JsonOutputParser(pydantic_object=cls)
-    log.debug(f'json_chain:{prompt}\n')
+    logger.debug(f'json_chain:{prompt}\n')
     response_json = chain.invoke(prompt)
     return json.dumps(response_json, ensure_ascii=False)
 
@@ -52,7 +52,7 @@ def tool_chain(model_name, prompt,tools=[]):
 
     tool_llm = create_json_llm(model_name)
     tool_llm = tool_llm.bind_tools(tools)
-    log.debug(f'tool_chain:{prompt}\n')
+    logger.debug(f'tool_chain:{prompt}\n')
 
     response_json = tool_llm.invoke(prompt)
     return response_json
