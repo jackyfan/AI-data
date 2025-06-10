@@ -7,7 +7,7 @@ conda activate AI-data
 ````
 2. 安装OpenAI依赖库
 ```bash
-pip install openai
+conda install openai
 #验证是否安装成功
 python -c "import openai;print('install openai success')"
 ```
