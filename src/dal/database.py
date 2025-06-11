@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3,os
 from typing import List, Tuple, Any, Optional
 
 
@@ -7,7 +7,9 @@ class SQLiteDB:
         """初始化SQLiteDB类，连接到指定的数据库文件。
             :param db_name: 数据库文件的名称
         """
-        self.db_name = db_name
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        db_dir = os.path.join(project_root, 'data', f'{db_name}')
+        self.db_name = db_dir
         self.connection = None
 
     def connect(self):

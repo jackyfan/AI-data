@@ -11,15 +11,16 @@ class LoggerHelper:
         """
         获取日志记录器
         :param name:
-        :return:
+        :return: 日志对象
         """
         config = Config()
         logger = logging.getLogger(name)
 
         if not logger.hasHandlers():
-            log_file = config["logging"].get('file', 'logs/application/log.default')
+            log_file = config["logging"].get('file', 'application.log.default')
             # 创建日志目录
-            log_dir = os.path.dirname(log_file)
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            log_dir = os.path.join(project_root, 'logs', f'{log_file}')
             if not os.path.exists(log_dir):
                 os.makedirs(log_dir)
             log_level = config['logging'].get('level', 'DEBUG')
