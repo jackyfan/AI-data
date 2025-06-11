@@ -2,17 +2,16 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.schema import AIMessage
 from utility.config import Config
 from utility.logger_helper import LoggerHelper
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from llm.openai_helper import json_chain
 
 config = Config()
 logger = LoggerHelper.get_logger(__name__)
-"""
-定义大模型返回的JSON格式
-"""
-
 
 class JsonResponse(BaseModel):
+    """
+    定义大模型返回的JSON格式
+    """
     serial_id: int = Field(description="数据包ID")
     id: str = Field(description="数据包")
     name: str = Field(description="数据包描述")
@@ -33,7 +32,7 @@ def invoke(user_input):
         -数据包中的"Metric"可以没有。
         #注意事项
         "拆解步骤"中一定只包含多个"数据包"和一个"结果"，不要存在多个"结果"。
-        严格按照如下JSON格式输出:
+        严格按照如下JSON格式输出，必须保证有metric:
         {{'step':[{{'serial_id':1,'id':'数据包n','name':'（数据包描述……）','input':'（输入数据包的详细执行描述……）','metric':['可量化的特性Metric'],'output':['输出字段'],'dependence':[serial_id])}},……]}}
     """
 
@@ -44,7 +43,7 @@ def invoke(user_input):
     logger.debug(f"{user_input=}")
     latest_message_content = user_input[-1].content
 
-    model_name = config["ReqAnalyst"].get("model_name","gpt-3.5-turbo")
+    model_name = config["LLM"].get("model_name","qwen-plus")
     response = json_chain(model_name=model_name, prompt=prompt.invoke(input={"messages": [latest_message_content], "agent_scratchpad": []}),cls=JsonResponse)
     logger.info(f'{response=}')
 

@@ -23,7 +23,7 @@ def create_llm(model_name="qwen-plus"):
     )
 
 
-def create_json_llm(model_name="gpt-3.5-turbo"):
+def create_json_llm(model_name="qwen-plus"):
     """
     创建并返回一个指定模型的实例,并设置返回格式为JSON
     :param model_name: 模型名称

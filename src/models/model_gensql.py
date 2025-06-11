@@ -1,4 +1,4 @@
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from dal.database import SQLiteDB
 from utility.config import Config
 from utility.logger_helper import LoggerHelper
@@ -59,15 +59,15 @@ def sql_generate(task, dep_data):
         feature_def.append(get_feature_definition(metric))
     print(f'{feature_def=}')
 
-    recommend_taleb = recommend_data_assets(user_input, topK=3)
+    recommend_table = recommend_data_assets(user_input, topK=3)
 
     table_assets = []
-    if recommend_taleb["code"] == 0:
+    if recommend_table["code"] == 0:
         db = SQLiteDB('example.sqlite3')
-        for table in recommend_taleb["data"]:
+        for table in recommend_table["data"]:
             table_assets.append(recommend_data_assets(db, table))
     prompt = template.format(user_input=user_input, query_specifications=
-        query_specifications, currdate=current_time, dep_data=dep_data, table_assets=table_assets, feature_def=feature_def)
-    model_name=config["sqlgenerate"].get("model_name","gpt-3.5-turbo")
-    response = json_chain(model_name, prompt,SQLResponse)
+    query_specifications, currdate=current_time, dep_data=dep_data, table_assets=table_assets, feature_def=feature_def)
+    model_name = config["LLM"].get("model_name", "qwen-plus")
+    response = json_chain(model_name, prompt, SQLResponse)
     return response

@@ -16,7 +16,7 @@ def access_control(permission_required,get_permission_func):
 
 def contains_escaped_unicode(s):
     """
-    匹配\u后面跟着4个十六进制数字的模式
+    匹配后面跟着4个十六进制数字的模式
     """
     pattern = re.compile(r'\\u[0-9a-fA-F]{4}')
     match = pattern.search(s)

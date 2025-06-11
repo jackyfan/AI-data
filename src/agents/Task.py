@@ -1,11 +1,12 @@
 from collections import defaultdict, deque
+from utility.logger_helper import LoggerHelper
 
-"""
-定义子任务
-"""
-
+logger = LoggerHelper.get_logger(__name__)
 
 class SubTask(object):
+    """
+    定义子任务
+    """
     def __init__(self, serial_id, name, dependencies, execute_function, step):
         self.serial_id = serial_id
         self.name = name
@@ -63,10 +64,11 @@ class TaskScheduler:
         :return:
         """
         execution_order = self.get_execution_order()
-        result = {}
+        logger.debug(f'{execution_order=}')
+        results = {}
         for task_id in execution_order:
             task = self.tasks[task_id]
             dep_results = [self.tasks[dep].result for dep in task.dependencies]
-            result = task.execute(dep_results)
+            results = task.execute(dep_results)
 
-        return result
+        return results
