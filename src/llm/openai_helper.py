@@ -4,17 +4,23 @@ from langchain_core.output_parsers import JsonOutputParser
 
 from utility.logger_helper import LoggerHelper
 
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("DASHSCOPE_API_KEY")
 logger = LoggerHelper.get_logger(__name__)
 
 
-def create_llm(model_name="gpt-3.5-turbo"):
+def create_llm(model_name="qwen-plus"):
     """
     创建并返回一个指定模型的实例
     :param model_name: 模型名称
     :return: 模型实例
     """
-    return ChatOpenAI(api_key=api_key, model_name=model_name, temperature=0)
+    # return ChatOpenAI(api_key=api_key, model_name=model_name, temperature=0)
+    return ChatOpenAI(
+        api_key=api_key,
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        model=model_name,
+        temperature=0
+    )
 
 
 def create_json_llm(model_name="gpt-3.5-turbo"):
@@ -41,7 +47,8 @@ def json_chain(model_name, prompt, cls):
     response_json = chain.invoke(prompt)
     return json.dumps(response_json, ensure_ascii=False)
 
-def tool_chain(model_name, prompt,tools=[]):
+
+def tool_chain(model_name, prompt, tools=[]):
     """
     使用指定模型和工具链生成响应信息
     :param model_name: 模型名称
@@ -56,4 +63,3 @@ def tool_chain(model_name, prompt,tools=[]):
 
     response_json = tool_llm.invoke(prompt)
     return response_json
-
