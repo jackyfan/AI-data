@@ -85,7 +85,7 @@ def perform_correction(message,db,model_name):
             continue
         else:
             break
-        return result
+    return result
 
 #修正历史中提取和返回最新的SQL代码
 def try_parse_new_sql(history):

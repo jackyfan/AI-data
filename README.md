@@ -17,3 +17,7 @@ pip install  langchain  langchain-experimental langchain-community langchain-cor
 # 验证是否安装成功
  python -c "from langchain_openai import OpenAI; chat=OpenAI();print('install LangChain success')"
 ```
+4. 安装FastAPI、Uvicorn
+```bash
+pip install fastapi uvicorn
+```
