@@ -89,6 +89,7 @@ def perform_correction(message, db, model_name):
             if selected_tool:
                 logger.debug(f'{tool_call=}')
                 tool_output = selected_tool(db, tool_call["args"]["table_name"])
+                logger.debug(f'{tool_output=}')
                 message.append(ToolMessage(json.dumps(tool_output, ensure_ascii=False), tool_call_id=tool_call["id"], role="tool"))
                 result.append(message[-1])
         if isinstance(message[-1], ToolMessage):
