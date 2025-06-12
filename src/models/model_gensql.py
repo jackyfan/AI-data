@@ -5,7 +5,7 @@ from utility.logger_helper import LoggerHelper
 from llm.openai_helper import json_chain
 from datetime import datetime
 from models.feature import get_feature_definition
-from models.recommend import recommend_data_assets
+from models.recommend import recommend_data_assets, recommend_data_asset
 
 config = Config()
 logger = LoggerHelper.get_logger(__name__)
@@ -25,7 +25,6 @@ def get_query_specifications():
         -尽可能使用SQL代码简单易读。
         -如果'用户问题'中的时间没有提到具体的年份和月份，以'当前日期'的年份和月份为准。
         -'指标定义'中的变量需要替换成准确的时间。
-        -SQL中的表名尽可能带上数据库名。
         -必须严格遵循SQLite的语法规范。
         -不支持stack语法。
     """
@@ -51,23 +50,28 @@ def sql_generate(task, dep_data):
     """
     query_specifications = get_query_specifications()
     current_time = datetime.now()
-    print(f'{task.step=}')
+    logger.debug(f'{task.step=}')
     user_input = task.step
 
-    feature_def = []
+    feature_defs = []
     for metric in task.step["metric"]:
-        feature_def.append(get_feature_definition(metric))
-    print(f'{feature_def=}')
+        feature_def = get_feature_definition(metric)
+        if not feature_def:
+            feature_defs.append(feature_def)
+    logger.debug(f'{feature_defs=}')
 
     recommend_table = recommend_data_assets(user_input, topK=3)
 
     table_assets = []
     if recommend_table["code"] == 0:
-        db = SQLiteDB('example.sqlite3')
+        logger.debug(f'{recommend_table=}')
+        # db = SQLiteDB('example.sqlite3')
         for table in recommend_table["data"]:
-            table_assets.append(recommend_data_assets(db, table))
+            table_assets.append(recommend_data_asset(table))
+
     prompt = template.format(user_input=user_input, query_specifications=
-    query_specifications, currdate=current_time, dep_data=dep_data, table_assets=table_assets, feature_def=feature_def)
+    query_specifications, currdate=current_time, dep_data=dep_data, table_assets=table_assets, feature_def=feature_defs)
     model_name = config["LLM"].get("model_name", "qwen-plus")
+    logger.debug(f"{prompt=}")
     response = json_chain(model_name, prompt, SQLResponse)
     return response

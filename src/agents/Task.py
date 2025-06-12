@@ -3,10 +3,12 @@ from utility.logger_helper import LoggerHelper
 
 logger = LoggerHelper.get_logger(__name__)
 
+
 class SubTask(object):
     """
     定义子任务
     """
+
     def __init__(self, serial_id, name, dependencies, execute_function, step):
         self.serial_id = serial_id
         self.name = name
@@ -21,17 +23,14 @@ class SubTask(object):
         return self.result
 
 
-"""
-任务调度与依赖管理
-"""
-
-
-
-
 class TaskScheduler:
+    """
+    任务调度与依赖管理
+    """
+
     def __init__(self, tasks):
         self.tasks = tasks
-        self.dependency_graph, self.indegrees = TaskScheduler.build_dependency_graph(self.tasks)
+        self.dependency_graph, self.indegrees = self.build_dependency_graph(self.tasks)
 
     def get_execution_order(self):
         """使用拓扑排序算法计算任务的执行顺序"""
@@ -48,27 +47,30 @@ class TaskScheduler:
             raise ValueError("存在循环依赖，无法完成所有任务调度。")
         return execution_order
 
-    @staticmethod
-    def build_dependency_graph(tasks):
+    def build_dependency_graph(self, tasks):
         """构建任务的依赖图，同时计算每个任务的入度"""
         graph = defaultdict(list)
-        indegrees = {task.serial_id: 0 for task in tasks}
+        for task in tasks:
+            logger.debug(f'{task.serial_id=}')
+        indegrees = {index: 0 for index, _ in enumerate(tasks)}
         for task in tasks:
             for dependency in task.dependencies:
                 graph[dependency].append(task.serial_id)
+                logger.debug(f'before:{indegrees[task.serial_id]=}')
                 indegrees[task.serial_id] += 1
+                logger.debug(f'after:{indegrees[task.serial_id]=}')
+        logger.debug(f'after:{indegrees=}')
         return graph, indegrees
+
     def execute_tasks(self):
         """
         按照依赖顺序执行所有任务
         :return:
         """
         execution_order = self.get_execution_order()
-        logger.debug(f'{execution_order=}')
         results = {}
-        for task_id in execution_order:
-            task = self.tasks[task_id]
+        for serial_id in execution_order:
+            task = self.tasks[serial_id]
             dep_results = [self.tasks[dep].result for dep in task.dependencies]
             results = task.execute(dep_results)
-
         return results

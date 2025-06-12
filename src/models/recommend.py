@@ -20,5 +20,9 @@ def recommend_data_assets(user_input, topK):
     # response = requests.post(url, json=data, headers=headers)
     # answer = response.json()
 
-    answer = {'code': 0, data: ['user_login', 'user_levelup', 'user_pay']}
+    answer = {'code': 0, 'data': ['user_login', 'user_levelup', 'user_pay']}
     return answer
+
+
+def recommend_data_asset(table):
+    return "user_login"
