@@ -25,12 +25,14 @@ async def analyze_message(request: MessageRequest):
         os.environ['LANGCHAIN_TRACING_V2'] = 'false'
         messages = [HumanMessage(content=msg) for msg in request.messages]
         response = ReqAnalyst.invoke(messages)
+        logger.debug(f'1.分析需求：{response=}')
         messages.append(response)
         steps = json.loads(response.content)
         sql = SQLGenerator.invoke(steps)
+        logger.debug(f'2.生成SQL：{sql=}')
         messages.append(AIMessage(content=sql))
         revisionMessage = SQLRevision.invoke(messages)
-        logger.debug(f'{revisionMessage=}')
+        logger.debug(f'3.修正SQL：{revisionMessage=}')
         return {"sql": revisionMessage[-1].content}
     except Exception as e:
         logger.error(f'Failed to analyze message:{e}')

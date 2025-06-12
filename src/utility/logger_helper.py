@@ -20,7 +20,8 @@ class LoggerHelper:
             log_file = config["logging"].get('file', 'application.log.default')
             # 创建日志目录
             project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-            log_dir = os.path.join(project_root, 'logs', f'{log_file}')
+            log_dir = os.path.join(project_root, 'logs')
+            log_file = os.path.join(log_dir, f'{log_file}')
             if not os.path.exists(log_dir):
                 os.makedirs(log_dir)
             log_level = config['logging'].get('level', 'DEBUG')

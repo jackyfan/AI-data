@@ -50,15 +50,12 @@ def sql_generate(task, dep_data):
     """
     query_specifications = get_query_specifications()
     current_time = datetime.now()
-    logger.debug(f'{task.step=}')
     user_input = task.step
 
-    feature_defs = []
+    feature_def = []
     for metric in task.step["metric"]:
-        feature_def = get_feature_definition(metric)
-        if not feature_def:
-            feature_defs.append(feature_def)
-    logger.debug(f'{feature_defs=}')
+        feature_def.append(get_feature_definition(metric))
+    logger.debug(f'{feature_def=}')
 
     recommend_table = recommend_data_assets(user_input, topK=3)
 
@@ -70,7 +67,7 @@ def sql_generate(task, dep_data):
             table_assets.append(recommend_data_asset(table))
 
     prompt = template.format(user_input=user_input, query_specifications=
-    query_specifications, currdate=current_time, dep_data=dep_data, table_assets=table_assets, feature_def=feature_defs)
+    query_specifications, currdate=current_time, dep_data=dep_data, table_assets=table_assets, feature_def=feature_def)
     model_name = config["LLM"].get("model_name", "qwen-plus")
     logger.debug(f"{prompt=}")
     response = json_chain(model_name, prompt, SQLResponse)

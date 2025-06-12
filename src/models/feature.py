@@ -21,10 +21,8 @@ def get_feature_definition(feature_name):
     :param feature_name: 指标特征的名称
     :return: 指标特征的定义，包括类型和描述。如果不存在，返回None
     """
-    print(f'{feature_name=}')
     result = {}
     for ft, val in feature_definitions.items():
-        print(f'{ft=},{val=}')
-        if feature_name in ft or ft in feature_name:
-            result[ft] = val
+        #if feature_name in ft or ft in feature_name:
+        result[ft] = val
     return result

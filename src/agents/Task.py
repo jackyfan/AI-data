@@ -49,17 +49,13 @@ class TaskScheduler:
 
     def build_dependency_graph(self, tasks):
         """构建任务的依赖图，同时计算每个任务的入度"""
+        logger.debug('生成任务关系图')
         graph = defaultdict(list)
-        for task in tasks:
-            logger.debug(f'{task.serial_id=}')
-        indegrees = {index: 0 for index, _ in enumerate(tasks)}
-        for task in tasks:
+        indegrees = {task.serial_id: 0 for task in tasks.values()}
+        for task in tasks.values():
             for dependency in task.dependencies:
                 graph[dependency].append(task.serial_id)
-                logger.debug(f'before:{indegrees[task.serial_id]=}')
                 indegrees[task.serial_id] += 1
-                logger.debug(f'after:{indegrees[task.serial_id]=}')
-        logger.debug(f'after:{indegrees=}')
         return graph, indegrees
 
     def execute_tasks(self):
@@ -67,10 +63,14 @@ class TaskScheduler:
         按照依赖顺序执行所有任务
         :return:
         """
+        logger.debug(f'开始执行任务')
         execution_order = self.get_execution_order()
+        logger.debug(f'任务执行顺序：{execution_order}')
         results = {}
         for serial_id in execution_order:
+            logger.debug(f'开始执行第{serial_id}个任务')
             task = self.tasks[serial_id]
             dep_results = [self.tasks[dep].result for dep in task.dependencies]
             results = task.execute(dep_results)
+            logger.debug(f'执行第{serial_id}个任务结果：{results=}')
         return results

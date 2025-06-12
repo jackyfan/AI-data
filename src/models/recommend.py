@@ -1,4 +1,5 @@
 import requests
+import random
 
 
 def recommend_data_assets(user_input, topK):
@@ -25,4 +26,5 @@ def recommend_data_assets(user_input, topK):
 
 
 def recommend_data_asset(table):
-    return "user_login"
+    assets = ["user_login","user_pay"]
+    return random.choice(assets)

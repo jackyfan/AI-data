@@ -38,7 +38,7 @@ def json_chain(model_name, prompt, cls):
     使用指定模型生成JSON格式的响应
     :param model_name: 模型名称
     :param prompt: 提示模板
-    :param cls:
+    :param cls: 返回模型
     :return:
     """
     json_llm = create_json_llm(model_name)
