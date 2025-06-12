@@ -45,7 +45,6 @@ def correct_sql(sql, db_error, history, db, model_name):
 # 修正SQL
 def invoke(message):
     try:
-        logger.debug(f'{message=}')
         task = json.loads(message[-1].content)
         logger.debug(f'{task=}')
         retry_limit = int(config["LLM"].get("retry", 3))
@@ -56,7 +55,6 @@ def invoke(message):
     except Exception as e:
         logger.error(f'Exception during message parsing:{e}')
         return None
-    logger.info(f'{retry_limit=}\n {task=}\n')
     eva_sql = task["sql"]
     history = []
     for attempt in range(retry_limit):
@@ -81,7 +79,6 @@ def perform_correction(message, db, model_name):
     while True:
         logger.debug("Processing tool_call cycle...")
         rsp = tool_chain(model_name, message, [get_table_asserts])
-        logger.debug(f'{rsp=}')
         message.append(rsp)
         result.append(rsp)
         for tool_call in rsp.tool_calls:

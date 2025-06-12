@@ -43,7 +43,6 @@ def json_chain(model_name, prompt, cls):
     """
     json_llm = create_json_llm(model_name)
     chain = json_llm | JsonOutputParser(pydantic_object=cls)
-    logger.debug(f'json_chain:{prompt}\n')
     response_json = chain.invoke(prompt)
     return json.dumps(response_json, ensure_ascii=False)
 
