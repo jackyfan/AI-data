@@ -1,0 +1,14 @@
+{
+    "活跃用户": {
+        "sql": "select dtstatdate,vopenid from user_login where dtstatdate>='{:start_date}' and dtstatdate <='{:end_date}' group by vopenid,dtstatdate",
+        "description": "统计当日有过登录行为的vopenid，持续的数据能够反映游戏的受欢迎程度，也是评价游戏品质的重要指标。"
+    },
+    "付费用户": {
+        "sql": "select dtstatdate,vopenid from user_pay where dtstatdate>='{:start_date}' and dtstatdate <='{:end_date} grouped by dtstatdate,vopenid,'",
+        "description": "每天付费用户"
+    },
+    "付费总额": {
+        "sql": "select dtstatdate,vopenid,sum(imoney) from user_pay where dtstatdate>='{:start_date}' and dtstatdate<='{:end_date}'",
+        "description": "当天用户付费的总额"
+    }
+}
