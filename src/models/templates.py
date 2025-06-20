@@ -1,3 +1,6 @@
+import datetime
+
+
 def requirement_clarification(user_query, domain_info):
     """
     需求澄清提示词
@@ -30,6 +33,7 @@ def requirement_clarification(user_query, domain_info):
        【业务知识】
        {domain_info}
     """
+    return template.format(user_query=user_query, domain_info=domain_info)
 
 
 def knowledge_extraction(chats):
@@ -79,6 +83,7 @@ def knowledge_extraction(chats):
     ##输入
     {chats}
     """
+    return template.format(chats=chats)
 
 
 def requirement_rewriting(user_query, domain_info):
@@ -118,3 +123,44 @@ def requirement_rewriting(user_query, domain_info):
         【业务知识】
         {domain_info}
     """
+    return template.format(user_query=user_query, domain_info=domain_info, now_date=datetime.datetime.now().strftime("%Y年%m月%d日"))
+
+
+def requirement_synthesis(table_info, examples):
+    """
+    需求合成
+    :param table_info: 资产表信息
+    :param examples: 参考示例
+    :return:
+    """
+    template = """
+    你是游戏领域资深的数据分析师，给定资产表信息和参考示例，仿照示例，生成10个需求描述。
+    ## 资产表信息
+    {table_info}
+    ## 参考示例
+    {examples}
+    每行输出一个需求描述，无须其他解释信息。
+    """
+    return template.format(table_info=table_info, examples=examples)
+
+
+def precise_ranking_fine_tuning(table_info, examples, question):
+    """
+    精排微调
+    :param table_info: 资产表信息
+    :param examples: 参考示例
+    :param question: 用户需求
+    :return:
+    """
+    template = """
+        你是游戏领域资深的数据分析师，给定候选资产表信息和用户需求，请从候选资产表中选择尽可能少的表来解决用户需求。
+        ## 参考示例
+        {examples}
+        
+        ## 资产表信息
+        {table_info}
+        
+        ## 用户需求
+        {question}
+    """
+    return template.format(table_info=table_info, examples=examples, question=question)
