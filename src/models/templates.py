@@ -252,7 +252,8 @@ def asset_information_improvement(db_name, tables_desc, foreign_keys):
 
     return template.format(db_name=db_name, tables_desc=tables_desc, foreign_keys=foreign_keys)
 
-def asset_structure_matching(db_name,tables_structure,foreign_keys,question,evidence):
+
+def asset_structure_matching(db_name, tables_structure, foreign_keys, question, evidence):
     template = """
         你是游戏领域资深的数据分析专家，擅长仔细思考并回答问题。
         
@@ -344,7 +345,8 @@ def asset_structure_matching(db_name,tables_structure,foreign_keys,question,evid
     """
     return template.format(db_name=db_name, tables_structure=tables_structure, foreign_keys=foreign_keys, question=question, evidence=evidence)
 
-def complex_requirement_decomposition_integration(db_name,tables_structure,foreign_keys,question,evidence):
+
+def complex_requirement_decomposition_integration(db_name, tables_structure, foreign_keys, question, evidence):
     template = """
         你是游戏领域资深的数据分析专家，擅长仔细思考并回答问题。
         ## 目标
@@ -456,3 +458,43 @@ def complex_requirement_decomposition_integration(db_name,tables_structure,forei
         {evidence}
     """
     return template.format(tables_structure=tables_structure, foreign_keys=foreign_keys, question=question, evidence=evidence)
+
+
+def correct_sql(sql, db_error, tables_structure, foreign_keys, question, evidence):
+    template = """
+        你是游戏领域资深的数据分析专家，擅长仔细思考并回答问题。
+        
+        ## 目标
+        接收资产表结构信息、外部知识、SQL查询、报错信息和问题，对SQL查询进行修改。
+        
+        ## 限制
+        1.尽可能用最少的表来求解问题；
+        2.避免with语法；
+        3.使用case when语法来简化SQL；
+        4.问题、外部知识、数据列描述中，关于值的格式描述可能有误，以参考示例中的格式为主；
+        5.当需要计算比率时，将数据列格式转为REAL，避免计算结果为0；
+        6.仅输出SQL代码，不需要其他信息。
+        
+        【问题】
+        {query}
+        
+        【外部知识】
+        {evidence}
+        
+        【资产结构】
+        {tables_structure}
+        
+        【外键】
+        {foreign_keys}
+        
+        【原SQL】
+        ```sql
+        {sql}
+        ```
+        
+        【报错信息】
+        {db_error}
+        现在请修复原SQL代码的错误，生成新的SQL查询。
+    """
+    return template.format(query=question, evidence=evidence, tables_structure=tables_structure, foreign_keys=foreign_keys, sql=sql,
+                           db_error=db_error)
