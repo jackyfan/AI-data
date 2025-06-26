@@ -344,3 +344,115 @@ def asset_structure_matching(db_name,tables_structure,foreign_keys,question,evid
     """
     return template.format(db_name=db_name, tables_structure=tables_structure, foreign_keys=foreign_keys, question=question, evidence=evidence)
 
+def complex_requirement_decomposition_integration(db_name,tables_structure,foreign_keys,question,evidence):
+    template = """
+        你是游戏领域资深的数据分析专家，擅长仔细思考并回答问题。
+        ## 目标
+        接收资产表结构信息、外部知识及问题，根据步骤，生成可以求解问题的SQL查询代码。
+        
+        ## 步骤
+        1.仔细理解资产表结构和外部知识；
+        2.将原问题拆解为更小的、可求解的子问题；
+        3.遵守限制，为每个子问题生成SQL查询代码；
+        4.求解所有子问题后，将这些子问题合并，用于求解原问题；
+        5.合并子问题时，移除子查询语法。
+        
+        ## 限制
+        1.尽可能用最少的表来求解问题；
+        2.避免with语法；
+        3.使用case when语法来简化SQL代码；
+        4.问题、外部知识、数据列的描述中，关于值的格式描述可能有误，以参考示例中的格式为主；
+        5.当需要计算比率时，将数据列格式转为REAL，避免计算结果为0。
+        
+        ## 示例
+        【资产结构】
+        # 表1: frpm
+        [
+        (CDSCode, CDSCode.examples:['09835', '112607'].),
+        (Charter School (Y/N),Charter School (Y/N).examples:[1, 0, None]. And 0: N;. 1: Y),
+        (Enrollment (Ages 5-17),Enrollment (Ages 5-17).examples:[5271.0].),
+        (Free Meal Count (Ages 5-17),Free Meal Count (Ages 5-17).examples: [3864.0, 2637.0].)
+        ]
+        
+        # 表2: satscores
+        [
+        (cds,California Department Schools.examples:['1010', '11010'].),
+        (sname,school name.examples:['None', 'Middle College High'].),
+        (NumTstTakr,Number of Test Takers in this school.examples:[24305].),
+        (AvgScrMath,average scores in Math.examples:[699, 698, None, 492].),
+        (NumGE1500,Number of Test Takers Whose Total SAT Scores Are Greater or Equal to 1500.examples:[5837, 2125, 0, None, 191])
+        ]
+        
+        【外键】
+        frpm.`CDSCode` = satscores.`cds`
+        
+        【问题】
+        List school names of charter schools with an SAT excellence rate over the average.
+        
+        【外部知识】
+        Charter schools refers to `Charter School (Y/N)` = 1 in the table frpm; 
+        Excellence rate = NumGE1500 / NumTstTakr
+        
+        将原问题拆解为子问题，并遵循限制，一步步思考，生成SQL查询代码:
+        
+        子问题 1: Get the average value of SAT excellence rate of charter schools.
+        SQL
+        ```sql
+        SELECT AVG(CAST(T2.`NumGE1500` AS REAL) / T2.`NumTstTakr`)
+        FROM frpm AS T1
+        INNER JOIN satscores AS T2
+        ON T1.`CDSCode` = T2.`cds`
+        WHERE T1.`Charter School (Y/N)` = 1
+        ```
+        
+        子问题2: List out school names of charter schools with an SAT excellence 
+        rate over the average.
+        SQL
+        ```sql
+        SELECT T2.`sname`
+        FROM frpm AS T1
+        INNER JOIN satscores AS T2
+        ON T1.`CDSCode` = T2.`cds`
+        WHERE T2.`sname` IS NOT NULL
+        AND T1.`Charter School (Y/N)` = 1
+        AND CAST(T2.`NumGE1500` AS REAL) / T2.`NumTstTakr` > (
+        SELECT AVG(CAST(T4.`NumGE1500` AS REAL) / T4.`NumTstTakr`)
+        FROM frpm AS T3
+        INNER JOIN satscores AS T4
+        ON T3.`CDSCode` = T4.`cds`
+        WHERE T3.`Charter School (Y/N)` = 1
+        )
+        ```
+        
+        原问题: List out school names of charter schools with an SAT excellence rate over the average.
+        参考子问题的SQL代码，移除子查询，最终的SQL代码为：
+        ```sql
+        SELECT T2.`sname`
+        FROM frpm AS T1
+        INNER JOIN satscores AS T2
+        ON T1.`CDSCode` = T2.`cds`
+        WHERE T2.`sname` IS NOT NULL
+        AND T1.`Charter School (Y/N)` = 1
+        AND CAST(T2.`NumGE1500` AS REAL) / T2.`NumTstTakr` > (
+        SELECT AVG(CAST(T4.`NumGE1500` AS REAL) / T4.`NumTstTakr`)
+        FROM frpm AS T3
+        INNER JOIN satscores AS T4
+        ON T3.`CDSCode` = T4.`cds`
+        WHERE T3.`Charter School (Y/N)` = 1
+        )
+        ```
+        
+        =========================
+        【资产结构】
+        {tables_structure}
+        
+        【外键】
+        {foreign_keys}
+        
+        【问题】
+        {question}
+        
+        【外部知识】
+        {evidence}
+    """
+    return template.format(tables_structure=tables_structure, foreign_keys=foreign_keys, question=question, evidence=evidence)
