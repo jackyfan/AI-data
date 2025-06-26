@@ -164,3 +164,183 @@ def precise_ranking_fine_tuning(table_info, examples, question):
         {question}
     """
     return template.format(table_info=table_info, examples=examples, question=question)
+
+
+def asset_information_improvement(db_name, tables_desc, foreign_keys):
+    """
+    资产信息完善提示词
+    :param db_name: 数据库
+    :param tables_desc: 表描述
+    :param foreign_keys: 外键信息
+    :return:
+    """
+    template = """
+      你是游戏领域资深的数据分析专家，擅长仔细思考并回答问题。
+        ## 目标
+        接收数据资产表，为资产表生成表描述。
+        ## 限制
+        1.根据数据库的名字，识别资产所处的领域，这将为你提供资产的上下文信息；
+        2.了解所有的资产表的信息以及表之间的外键关系，以便你理解资产表关系；
+        3.为每张资产表生成一个简短的描述，用于解释表的用途；
+        4.描述中不需要列出资产的数据列信息；
+    
+        5.以JSON格的式输出结果；
+    
+       ## 示例
+    
+       【数据库名字】银行系统
+    
+       【资产描述】
+        # 表1: account
+       [
+        (account_id, the id of the account. examples:[11382, 11362].),
+        (district_id, location of branch. examples:[77, 76, 2, 1, 39].),
+        (frequency, frequency of the acount. examples:['POPLATEK MESICNE', 'POPLATEK TYDNE', 'POPLATEK PO OBRATU'].),
+        (date, the creation date of the account. examples:['1997-12-29'].)
+       ]
+    
+       # 表2: client
+       [
+        (client_id, the unique number. examples:[13998, 13971, 2, 1, 2839].),
+        (gender, gender. Value examples:['M', 'F']. And F：female . M：male ),
+        (birth_date, birth date. examples:['1987-09-27', '1986-08-13'].),
+        (district_id, location of branch. examples:[77, 76, 2, 1, 39].)
+       ]
+    
+       # 表3: loan
+       [
+        (loan_id, the id number identifying the loan data.examples:[4959].),
+        (account_id, the id number identifying the account.examples:[10].),
+        (date, the date when the loan is approved.examples:['1998-07-12'].),
+        (amount, the id number identifying the loan data.examples:[1567].),
+        (duration, the id number identifying the loan data.examples:[60].),
+        (payments, the id number identifying the loan data.examples:[3456].),
+        (status, the id number identifying the loan data.examples:['C'].)
+       ]
+    
+       # 表4: district
+        [
+        (district_id, location of branch.examples:[77, 76].),
+        (A2, area in square kilometers.examples:[50.5, 48.9].),
+        (A4, number of inhabitants.examples:[95907, 95616].),
+        (A5, number of households.examples:[35678, 34892].),
+        (A6, literacy rate.examples:[95.6, 92.3, 89.7].),
+       ]
+       
+       【外键】
+       client.`district_id` = district.`district_id`
+       
+      【答案】
+       {{
+       "account": "Stores details about individual bank accounts.",
+    
+       "client": "Stores personal information about each client.",
+    
+       "loan": "Stores information about loans associated with each account.",
+    
+       "district": "Stores demographic and economic information about each district."
+    
+       }}
+       ======================
+       【数据库名字】{db_name}
+       【资产描述】
+       {tables_desc}
+       【外键】
+       {foreign_keys}
+       【答案】
+    """
+
+    return template.format(db_name=db_name, tables_desc=tables_desc, foreign_keys=foreign_keys)
+
+def asset_structure_matching(db_name,tables_structure,foreign_keys,question,evidence):
+    template = """
+        你是游戏领域资深的数据分析专家，擅长仔细思考并回答问题。
+        
+        ## 目标
+        接收资产表结构信息、外部知识及问题，请从资产表中，选择与问题相关的数据列。
+        
+        ## 步骤
+        1.对于每张资产表的每个数据列，检查是否与问题或外部知识相关，无关则丢弃；
+        2.如果资产表的所有列都与问题或外部知识无关，则保留空数组；
+        3.根据与问题、外部知识的相关性，为数据列排序；
+        4.以JSON格式输出；
+        
+        ## 示例
+        
+        【数据库名字】银行系统
+        
+        【资产描述】
+        # 表1: account,Stores details about individual bank accounts.
+        [
+            (account_id, the id of the account. examples:[11382, 11362].),
+            (district_id, location of branch. examples:[77, 76, 2, 1, 39].),
+            (frequency, frequency of the account. examples:['POPLATEK MESICNE', 'POPLATEK TYDNE', 'POPLATEK PO OBRATU'].),
+            (date, the creation date of the account. examples:['1997-12-29'].)
+        ]
+        
+        # 表2: client,Stores personal information about each client.
+        [
+            (client_id, the unique number. examples:[13998, 13971, 2, 1, 2839].),
+            (gender, gender. Value examples:['M', 'F']. And F：female . M：male ),
+            (birth_date, birth date. examples:['1987-09-27', '1986-08-13'].),
+            (district_id, location of branch. examples:[77, 76, 2, 1, 39].)
+        ]
+        
+        # 表3: loan,Stores information about loans associated with each account.
+        [
+            (loan_id, the id number identifying the loan data.examples:[4959].),
+            (account_id, the id number identifying the account.examples:[10].),
+            (date, the date when the loan is approved.examples:['1998-07-12'].),
+            (amount, the id number identifying the loan data.examples:[1567].),
+            (duration, the id number identifying the loan data.examples:[60].),
+            (payments, the id number identifying the loan data.examples:[3456].),
+            (status, the id number identifying the loan data.examples:['C'].)
+        ]
+        
+        # 表4: district,Stores demographic and economic information about each district.
+        [
+            (district_id, location of branch.examples:[77, 76].),
+            (A2, area in square kilometers.examples:[50.5, 48.9].),
+            (A4, number of inhabitants.examples:[95907, 95616].),
+            (A5, number of households.examples:[35678, 34892].),
+            (A6, literacy rate.examples:[95.6, 92.3, 89.7].),
+        ]
+        
+        【外键】
+        client.`district_id` = district.`district_id`
+        
+        【问题】
+        What is the gender of the youngest client who opened account in the lowest average salary branch?
+
+        【外部知识】
+        Later birthdate refers to younger age; A5 refers to average salary.
+
+        【答案】
+        
+        ```json
+        {{
+        "account": [],
+        "client": ["gender", "birth_date", "district_id"],
+        "loan": [],
+        "district": ["district_id", "A5", "A2", "A4", "A6", "A7"]
+        }}
+        ```
+        ========================
+        【数据库名字】 {db_name}
+        
+        【资产结构】
+        {tables_structure}
+        
+        【外键】
+        {foreign_keys}
+        
+        【问题】
+        {question}
+        
+        【外部知识】
+        {evidence}
+        
+        【答案】
+    """
+    return template.format(db_name=db_name, tables_structure=tables_structure, foreign_keys=foreign_keys, question=question, evidence=evidence)
+
